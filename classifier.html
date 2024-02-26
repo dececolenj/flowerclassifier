@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+		<script type="text/javascript">
+    // More API functions here:
+    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+
+    // the link to your model provided by Teachable Machine export panel
+    const URL = "https://teachablemachine.withgoogle.com/models/vDABdw5RN/";
+
+    let model, webcam, labelContainer, maxPredictions;
+
+    // Load the image model and setup the webcam
+    async function init() {
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+
+        // load the model and metadata
+        // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
+        // or files from your local hard drive
+        // Note: the pose library adds "tmImage" object to your window (window.tmImage)
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        // Convenience function to setup a webcam
+        const flip = true; // whether to flip the webcam
+        webcam = new tmImage.Webcam(500, 500); // width, height, flip
+        await webcam.setup(); // request access to the webcam
+        await webcam.play();
+        window.requestAnimationFrame(loop);
+
+        // append elements to the DOM
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+        labelContainer = document.getElementById("label-container");
+        for (let i = 0; i < maxPredictions; i++) { // and class labels																																																																																																
+            labelContainer.appendChild(document.createElement("div"));
+        }
+    }
+
+    async function loop() {
+        webcam.update(); // update the webcam frame
+        await predict();
+        window.requestAnimationFrame(loop);
+    }
+
+    // run the webcam image through the image model
+    async function predict() {
+        // predict can take in an image, video or canvas html element
+        const prediction = await model.predict(webcam.canvas);
+        for (let i = 0; i < maxPredictions; i++) {
+            const classPrediction =
+                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+            labelContainer.childNodes[i].innerHTML = classPrediction;
+        }
+    }
+</script>
+
+		<style>
+		body {
+			font-family: courier;
+		}
+		
+		button{padding: 15px 25px; radius: 15px; font-family: Courier;}
+		
+		.button {
+		  display: inline-block;
+		  padding: 5px 10px;
+		  font-size: 15px;
+		  cursor: pointer;
+		  text-align: center;
+		  text-decoration: none;
+		  outline: none;
+		  color: #fff;
+		  background-color: #4E0707;
+		  border: none;
+		  border-radius: 50px;
+		  box-shadow: 0 9px #999;
+		}
+
+		.button:hover {background-color: #BC544B}
+
+		.button:active {
+		  background-color: #4E0707;
+		  box-shadow: 0 5px #666;
+		  transform: translateY(4px);
+}
+		a {
+		text-decoration: none;
+		display: inline-block;
+		padding: 8px 16px;
+}
+
+		a:hover {
+		background-color: #ddd;
+		color: black;
+}
+
+		.next {
+		background-color: #FFBF00;
+		color: black;
+}
+		.wrapper{
+			width: cover;
+			padding: 2rem 0 1rem 0;
+			margin: 20px ;
+			background: 	#F8DE7E;
+			border-radius: 30px;
+			text-align: justify;
+			box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
+			opacity: 0.85;
+			
+			}
+			
+		hr {
+		border-color: red;
+}
+		</style>
+		
+	</head>
+	
+	<body style="background-image:url(yellow.gif);background-repeat:no-repeat;background-size:cover;">
+	<div class="wrapper">
+	<a href="index.html" class="next"><b>&laquo;  Back </a></b>
+
+		<br>
+		<center>
+				<font size="5" 
+				 face = "Courier"><b>
+				Image Classification using Camera<hr>
+				</font></b>
+				<br><br>
+		</center>		
+		
+		<div style="display: flex;">
+		<div style="display: flex; flex-direction: column; align-items: center; margin-left: 50px;">
+        <div id="webcam-container" style="height:500px; width:500px; border:solid 2px black;"></div>
+        <div id="label-container"></div>
+    </div>
+	
+		<div style="display: flex; flex-direction: column; align-items: center; margin-right: 100px; margin-left: 50px;">
+			<img src="Rose1.jpg" alt="Image 1" width="200" height="200">
+			<p><b>Roses</p></b>
+			<img src="Gumamela1.jpg" alt="Image 2" width="200" height="200">
+			<p><b>Gumamela</p></b>
+		</div>
+		
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<img src="Tulips1.jpg" alt="Image 3" width="200" height="200">
+			<p><b>Tulips</p></b>
+			<img src="notflower.jpg" alt="Image 4" width="200" height="200">
+			<p align="center"><b>Not roses, Not Gumamela, Not tulips</p></b>
+		</div>
+		
+	</div>
+		<br>
+		<button type="button" onclick="init()" style="background-color: #FFBF00; height:100px;width:500px; margin-left: 50px; margin-right: auto;">
+		<font size="5" face="Courier"><b>START</b></font>
+		</button>
+
+
+</html>
+</div>
